@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'todo',
     'login',
     'hobbies',
+    'attendance'
 ]
 
 MIDDLEWARE = [
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'journal_app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'journal_app/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

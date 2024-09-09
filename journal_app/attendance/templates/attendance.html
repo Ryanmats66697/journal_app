@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Attendance Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/home/">Student Dashboard</a>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="/home/">Home</a></li>
+            <!-- Add other navigation items if needed -->
+        </ul>
+    </nav>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Course Attendance Tracker</h1>
+
+        <div class="mb-4">
+            <div class="row">
+                <div class="col">
+                    <input type="text" id="courseName" class="form-control" placeholder="Enter course name">
+                </div>
+                <div class="col">
+                    <input type="number" id="totalLectures" class="form-control" placeholder="Enter total number of lectures">
+                </div>
+                <div class="col">
+                    <button id="addCourseBtn" class="btn btn-primary w-100">Add Course</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="coursesContainer" class="mb-4"></div>
+
+        <canvas id="attendanceChart" width="500" height="300" class="mt-4"></canvas>
+    </div>
+
+    <script>
+       let courses = [];
+let attendanceChart = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateCourses();
+    updateChart();
+});
+
+// Add course event listener
+document.getElementById('addCourseBtn').addEventListener('click', () => {
+    const courseName = document.getElementById('courseName').value;
+    const totalLectures = parseInt(document.getElementById('totalLectures').value, 10);
+
+    if (courseName && totalLectures > 0) {
+        fetch('/add-course/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ name: courseName, totalLectures: totalLectures }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateCourses();
+                document.getElementById('courseName').value = '';
+                document.getElementById('totalLectures').value = '';
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => console.error('Error adding course:', error));
+    }
+});
+
+// Render courses
+function renderCourses(courses) {
+    const coursesContainer = document.getElementById('coursesContainer');
+    coursesContainer.innerHTML = '';
+
+    courses.forEach((course, courseIndex) => {
+        const courseDiv = document.createElement('div');
+        courseDiv.classList.add('mb-3');
+
+        const courseTitle = document.createElement('h5');
+        courseTitle.textContent = course.name;
+        courseDiv.appendChild(courseTitle);
+
+        course.attendance.forEach((att, lectureIndex) => {
+            const lectureDiv = document.createElement('div');
+            lectureDiv.classList.add('d-flex', 'align-items-center', 'mb-2');
+
+            const lectureLabel = document.createElement('span');
+            lectureLabel.textContent = `Lecture ${lectureIndex + 1}`;
+            lectureLabel.classList.add('me-2');
+            lectureDiv.appendChild(lectureLabel);
+
+            const markAttendanceBtn = document.createElement('button');
+            markAttendanceBtn.classList.add('btn', att.attended ? 'btn-success' : 'btn-secondary');
+            markAttendanceBtn.textContent = 'Mark Attendance';
+            markAttendanceBtn.addEventListener('click', () => {
+                fetch('/mark-attendance/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({
+                        courseId: course.id,
+                        lectureNumber: lectureIndex + 1,
+                        attended: !att.attended,
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCourses();
+                        updateChart();
+                    } else {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => console.error('Error marking attendance:', error));
+            });
+
+            lectureDiv.appendChild(markAttendanceBtn);
+            courseDiv.appendChild(lectureDiv);
+        });
+
+        coursesContainer.appendChild(courseDiv);
+    });
+}
+
+
+// Fetch and update courses
+function updateCourses() {
+    fetch('/get-attendance-data/')
+    .then(response => response.json())
+    .then(data => {
+        courses = data.courses;
+        renderCourses(courses);
+    })
+    .catch(error => console.error('Error fetching attendance data:', error));
+}
+
+// Fetch and update chart
+function updateChart() {
+    fetch('/get-attendance-data/')
+    .then(response => response.json())
+    .then(data => {
+        const chartData = data.courses.map(course => {
+            const totalLectures = course.attendance.length;
+            const attendedLectures = course.attendance.filter(att => att.attended).length;
+            const attendancePercentage = (attendedLectures / totalLectures) * 100;
+            return { name: course.name, attendance: attendancePercentage };
+        });
+
+        if (attendanceChart) {
+            attendanceChart.data.labels = chartData.map(data => data.name);
+            attendanceChart.data.datasets[0].data = chartData.map(data => data.attendance);
+            attendanceChart.update();
+        } else {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            attendanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(data => data.name),
+                    datasets: [{
+                        label: 'Attendance Percentage',
+                        data: chartData.map(data => data.attendance),
+                        backgroundColor: '#4CAF50',
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                        },
+                    },
+                },
+            });
+        }
+    })
+    .catch(error => console.error('Error fetching attendance data:', error));
+}
+
+// Get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    </script>
+</body>
+</html>
