@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker</title>
+
+    <!-- Inline CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Finance Tracker</a>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance_tracker' %}">Home</a></li>
+            <!-- Add other navigation items if needed -->
+        </ul>
+    </nav>
+
+    <div class="container my-4">
+        <h2 class="mb-4 text-center">Finance Tracker</h2>
+        <div class="row">
+            <!-- Income and Expense Tracking -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-plus-circle text-success"></i> Income & Expense Tracking</h5>
+                        <form id="financeForm">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="description">Description</label>
+                                    <input type="text" class="form-control" id="description" name="description" placeholder="E.g., Salary, Rent" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="amount">Amount</label>
+                                    <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" min="0" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label for="type">Type</label>
+                                    <select class="form-control" id="type" name="type" required>
+                                        <option value="Credit">Credit (Income)</option>
+                                        <option value="Debit">Debit (Expense)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Add Transaction</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Planning -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-bullseye text-warning"></i> Budget Planning & Savings Goals</h5>
+                        <form id="budgetForm">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="budgetCategory">Budget Category</label>
+                                    <input type="text" class="form-control" id="budgetCategory" name="category" placeholder="E.g., Food, Rent" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="budgetAmount">Planned Amount</label>
+                                    <input type="number" class="form-control" id="budgetAmount" name="amount" placeholder="Enter budget amount" min="0" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-block">Add Budget</button>
+                        </form>
+                        <hr>
+                        <h6 class="text-muted">Savings Goal</h6>
+                        <div class="form-group">
+                            <label for="savingsGoal">Set Savings Goal</label>
+                            <input type="number" class="form-control" id="savingsGoal" name="goal" placeholder="Enter goal amount" min="0" required>
+                        </div>
+                        <button id="saveGoalBtn" type="button" class="btn btn-success btn-block">Save Goal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Finance text -->
+        <div>
+            <h3>Financial Overview</h3>
+            <p>Total Income: {{ total_income }}</p>
+            <p>Total Expenses: {{ total_expenses }}</p>
+            <p>Money Left: {{ money_left }}</p>
+            <p>Savings Goal: {{ savings_goal }}</p>
+    </div>
+
+
+        <!-- Visual Breakdown Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-lg">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-chart-pie"></i> Visual Breakdown of Spending Categories</h5>
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inline JavaScript -->
+    <script>
+        document.getElementById('financeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch("{% url 'add_transaction' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Transaction Added Successfully');
+                } else {
+                    alert('Failed to Add Transaction');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('budgetForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const category = document.getElementById('budgetCategory').value;
+            const amount = document.getElementById('budgetAmount').value;
+
+            fetch("{% url 'add_budget' %}", {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'category': category,
+                    'amount': amount
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Budget Added Successfully');
+                } else {
+                    alert('Failed to Add Budget: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('saveGoalBtn').addEventListener('click', function () {
+            const goal = document.getElementById('savingsGoal').value;
+
+            fetch("{% url 'save_savings_goal' %}", {
+                method: 'POST',
+                body: JSON.stringify({ goal: goal }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Savings Goal Set Successfully');
+                    document.getElementById('savingsGoal').value = '';  // Clear input after success
+                } else {
+                    alert('Failed to Set Savings Goal: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch("{% url 'get_budget_data' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('spendingChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                data: data.values,
+                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+                });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+
+</html>
