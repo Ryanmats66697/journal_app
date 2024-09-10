@@ -88,19 +88,7 @@ def save_savings_goal(request):
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-def finance_tracker(request):
-    # Query all data from models
-    transactions = Transaction.objects.all()
-    budgets = Budget.objects.all()
-    savings_goals = SavingsGoal.objects.all()
 
-    # Prepare context for the template
-    context = {
-        'transactions': transactions,
-        'budgets': budgets,
-        'savings_goals': savings_goals,
-    }
-    return render(request, 'finance.html', context)
 
 def get_budget_data(request):
     # Query all budgets

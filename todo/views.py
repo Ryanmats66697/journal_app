@@ -13,7 +13,7 @@ def task_list_view(request):
             Task.objects.create(text=new_task_text)
         return redirect('task_list')
 
-    return render(request, 'hobbies.html', {'tasks': tasks})
+    return render(request, 'todo.html', {'tasks': tasks})
 
 
 def toggle_task_view(request, task_id):

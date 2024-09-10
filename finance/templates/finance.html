@@ -32,9 +32,9 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Finance Tracker</a>
+        <a class="navbar-brand" href="/home/">Finance Tracker</a>
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item"><a class="nav-link" href="{% url 'finance_tracker' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="/home/">Home</a></li>
             <!-- Add other navigation items if needed -->
         </ul>
     </nav>
@@ -108,7 +108,7 @@
             <h3>Financial Overview</h3>
             <p>Total Income: {{ total_income }}</p>
             <p>Total Expenses: {{ total_expenses }}</p>
-            <p>Money Left: {{ money_left }}</p>
+            <p><b>Money Left: {{ money_left }}</b></p>
             <p>Savings Goal: {{ savings_goal }}</p>
     </div>
 
