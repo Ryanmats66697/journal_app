@@ -27,5 +27,6 @@ urlpatterns = [
     path('',include('finance.urls')),
     path('',include('hobbies.urls')),
     path('',include('attendance.urls')),
-    path('',include('mood.urls'))
+    path('',include('mood.urls')),
+    path('',include('health.urls')),
 ]

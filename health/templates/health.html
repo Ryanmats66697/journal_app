@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tracker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="">Student Dashboard</a>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" href="">Trackers</a></li>
+            <li class="nav-item"><a class="nav-link" href="">Todo List</a></li>
+        </ul>
+    </nav>
+    <div class="container my-4">
+        <h2 class="mb-4 text-center">Health Tracker</h2>
+        <!-- Health Logs Section -->
+        <div class="row">
+            <!-- Exercise Log Form -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-dumbbell text-primary"></i> Exercise Log</h5>
+                        <form id="exerciseForm" method="post" action="{% url 'health' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="exerciseType">Exercise Type</label>
+                                <input type="text" class="form-control" id="exerciseType" name="exerciseType" placeholder="E.g., Running, Yoga">
+                            </div>
+                            <div class="form-group">
+                                <label for="exerciseDuration">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="exerciseDuration" name="exerciseDuration" placeholder="Enter duration">
+                            </div>
+                            <div class="form-group">
+                                <label for="caloriesBurned">Calories Burned</label>
+                                <input type="number" class="form-control" id="caloriesBurned" name="caloriesBurned" placeholder="Enter calories burned">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Add Exercise</button>
+                        </form>
+                        <!-- Display Exercise Logs -->
+                        <h5 class="mt-4">Exercise Logs</h5>
+                        <ul>
+                            {% for exercise in exercises %}
+                            <li>{{ exercise.type }}: {{ exercise.duration }} minutes, {{ exercise.calories_burned }} calories burned</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Sleep Tracking Form -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-bed text-success"></i> Sleep Tracking</h5>
+                        <form id="sleepForm" method="post" action="{% url 'health' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="sleepDuration">Sleep Duration (hours)</label>
+                                <input type="number" class="form-control" id="sleepDuration" name="sleepDuration" placeholder="Enter sleep duration">
+                            </div>
+                            <div class="form-group">
+                                <label for="sleepQuality">Sleep Quality</label>
+                                <select class="form-control" id="sleepQuality" name="sleepQuality">
+                                    <option value="Excellent">Excellent</option>
+                                    <option value="Good">Good</option>
+                                    <option value="Fair">Fair</option>
+                                    <option value="Poor">Poor</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">Add Sleep Record</button>
+                        </form>
+                        <!-- Display Sleep Logs -->
+                        <h5 class="mt-4">Sleep Logs</h5>
+                        <ul>
+                            {% for sleep in sleep_records %}
+                            <li>{{ sleep.duration }} hours, {{ sleep.quality }} quality</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Meal Planning Form -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-utensils text-warning"></i> Nutrition/Meal Planning</h5>
+                        <form id="mealForm" method="post" action="{% url 'health' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="mealDescription">Meal Description</label>
+                                <input type="text" class="form-control" id="mealDescription" name="mealDescription" placeholder="E.g., Breakfast, Lunch">
+                            </div>
+                            <div class="form-group">
+                                <label for="mealCalories">Calories</label>
+                                <input type="number" class="form-control" id="mealCalories" name="mealCalories" placeholder="Enter calories">
+                            </div>
+                            <div class="form-group">
+                                <label for="mealProtein">Protein (grams)</label>
+                                <input type="number" class="form-control" id="mealProtein" name="mealProtein" placeholder="Enter protein">
+                            </div>
+                            <div class="form-group">
+                                <label for="mealCarbs">Carbohydrates (grams)</label>
+                                <input type="number" class="form-control" id="mealCarbs" name="mealCarbs" placeholder="Enter carbohydrates">
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-block">Add Meal</button>
+                        </form>
+                        <!-- Display Meal Logs -->
+                        <h5 class="mt-4">Meal Logs</h5>
+                        <ul>
+                            {% for meal in meals %}
+                            <li>{{ meal.description }}: {{ meal.calories }} calories, {{ meal.protein }}g protein, {{ meal.carbs }}g carbs</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Health Goals Section -->
+        <div class="row">
+            <!-- Health Goals Form -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-bullseye text-info"></i> Health Goals</h5>
+                        <form id="goalForm" method="post" action="{% url 'health' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="goalType">Goal Type</label>
+                                <select class="form-control" id="goalType" name="goalType">
+                                    <option value="Exercise">Exercise</option>
+                                    <option value="Sleep">Sleep</option>
+                                    <option value="Nutrition">Nutrition</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="goalTarget">Target Value</label>
+                                <input type="number" class="form-control" id="goalTarget" name="goalTarget" placeholder="Enter target value (e.g., 5 workouts/week)">
+                            </div>
+                            <button type="submit" class="btn btn-info btn-block">Set Goal</button>
+                        </form>
+                        <!-- Display Goals -->
+                        <h5 class="mt-4">Goals</h5>
+                        <ul>
+                            {% for goal in goals %}
+                            <li>{{ goal.goal_type }}: {{ goal.target_value }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Progress Overview (Chart.js) -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-chart-line text-danger"></i> Progress Overview</h5>
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    var ctx = document.getElementById('progressChart').getContext('2d');
+    var progressChart = new Chart(ctx, {
+        type: 'line', // or 'bar'
+        data: {
+            labels: {{ days|safe }}, // Dynamic days
+            datasets: [{
+                label: 'Calories Burned',
+                data: {{ daily_burnt_calories|safe }}, // Dynamic data
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>
