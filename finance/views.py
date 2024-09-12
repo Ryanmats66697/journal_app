@@ -5,8 +5,6 @@ from django.shortcuts import render
 import json
 from django.db.models import Sum
 
-
-
 @csrf_exempt
 def finance_tracker(request):
     # Query all transactions
@@ -50,9 +48,6 @@ def add_transaction(request):
             return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
-
-
-
 @csrf_exempt
 def add_budget(request):
     if request.method == 'POST':
@@ -71,7 +66,6 @@ def add_budget(request):
                 return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-
 @csrf_exempt
 def save_savings_goal(request):
     if request.method == 'POST':
@@ -88,13 +82,13 @@ def save_savings_goal(request):
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-
-
 def get_budget_data(request):
-    # Query all budgets
-    budgets = Budget.objects.all()
+    # Query all expenses from the Transaction model
+    expenses = Transaction.objects.filter(transaction_type='Debit')
+    categories = expenses.values('description').annotate(total_amount=Sum('amount'))
+
     data = {
-        'labels': [budget.category for budget in budgets],
-        'values': [float(budget.planned_amount) for budget in budgets],
+        'labels': [category['description'] for category in categories],
+        'values': [float(category['total_amount']) for category in categories],
     }
     return JsonResponse(data)

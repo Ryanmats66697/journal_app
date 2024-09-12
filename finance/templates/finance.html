@@ -103,15 +103,14 @@
             </div>
         </div>
 
-        <!--Finance text -->
+        <!-- Financial Overview -->
         <div>
             <h3>Financial Overview</h3>
             <p>Total Income: {{ total_income }}</p>
             <p>Total Expenses: {{ total_expenses }}</p>
             <p><b>Money Left: {{ money_left }}</b></p>
             <p>Savings Goal: {{ savings_goal }}</p>
-    </div>
-
+        </div>
 
         <!-- Visual Breakdown Section -->
         <div class="row">
@@ -152,17 +151,11 @@
 
         document.getElementById('budgetForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            const category = document.getElementById('budgetCategory').value;
-            const amount = document.getElementById('budgetAmount').value;
-
+            const formData = new FormData(this);
             fetch("{% url 'add_budget' %}", {
                 method: 'POST',
-                body: new URLSearchParams({
-                    'category': category,
-                    'amount': amount
-                }),
+                body: formData,
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRFToken': '{{ csrf_token }}'
                 }
@@ -172,7 +165,7 @@
                 if (data.success) {
                     alert('Budget Added Successfully');
                 } else {
-                    alert('Failed to Add Budget: ' + (data.error || 'Unknown error'));
+                    alert('Failed to Add Budget');
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -180,7 +173,6 @@
 
         document.getElementById('saveGoalBtn').addEventListener('click', function () {
             const goal = document.getElementById('savingsGoal').value;
-
             fetch("{% url 'save_savings_goal' %}", {
                 method: 'POST',
                 body: JSON.stringify({ goal: goal }),
@@ -193,10 +185,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Savings Goal Set Successfully');
-                    document.getElementById('savingsGoal').value = '';  // Clear input after success
+                    alert('Savings Goal Saved Successfully');
                 } else {
-                    alert('Failed to Set Savings Goal: ' + (data.error || 'Unknown error'));
+                    alert('Failed to Save Savings Goal');
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -213,7 +204,7 @@
                             labels: data.labels,
                             datasets: [{
                                 data: data.values,
-                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
                             }]
                         },
                         options: {
@@ -224,8 +215,9 @@
         });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
