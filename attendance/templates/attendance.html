@@ -10,16 +10,23 @@
             background-color: #f8f9fa;
         }
 
-        .navbar {
-            margin-bottom: 20px;
+        .accordion-button {
+            text-align: center;
+            color: black;
+            background-color: #f8f9fa !important; /* Light background */
+            border: none; /* Remove button borders */
+            width: 100%; /* Full width */
+            font-weight: bold; /* Bold text */
+            font-size: 1.2rem; /* Larger font */
         }
 
-        .card {
-            margin-bottom: 20px;
+        .accordion-button:hover {
+            text-decoration: none;
+            background-color: #e2e2e2; /* Slight hover effect */
         }
 
-        .btn-block {
-            width: 100%;
+        .accordion-header {
+            padding: 10px 0; /* Spacing around the header */
         }
     </style>
 
@@ -30,16 +37,17 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
-    <a class="navbar-brand font-weight-bold" href="/home/" style="font-size: 1.5rem;">Home Dashboard</a>
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/finance/">Finance</a></li>
-        <li class="nav-item"><a class="nav-link active font-weight-bold" href="/attendance/">Attendance</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/health/">Health</a></li>
-        <li class="nav-item"><a class="nav-link  font-weight-bold" href="/mood-tracker/">Mood</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/hobbies/">Hobbies</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/todo/">To Do List</a></li>
-    </ul>
+        <a class="navbar-brand font-weight-bold" href="/home/" style="font-size: 1.5rem;">Dashboard</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/finance/">Finance</a></li>
+            <li class="nav-item"><a class="nav-link active font-weight-bold" href="/attendance/">Attendance</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/health/">Health</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/mood-tracker/">Mood</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/hobbies/">Hobbies</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/todo/">Todo List</a></li>
+        </ul>
     </nav>
+
     <div class="container mt-4">
         <h1 class="text-center mb-4">Course Attendance Tracker</h1>
 
@@ -57,176 +65,193 @@
             </div>
         </div>
 
-        <div id="coursesContainer" class="mb-4"></div>
+        <!-- Accordion for courses -->
+        <div class="accordion" id="coursesAccordion"></div>
 
         <canvas id="attendanceChart" width="500" height="300" class="mt-4"></canvas>
     </div>
 
     <script>
-       let courses = [];
-let attendanceChart = null;
+        let courses = [];
+        let attendanceChart = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    updateCourses();
-    updateChart();
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCourses();
+            updateChart();
+        });
 
-// Add course event listener
-document.getElementById('addCourseBtn').addEventListener('click', () => {
-    const courseName = document.getElementById('courseName').value;
-    const totalLectures = parseInt(document.getElementById('totalLectures').value, 10);
+        // Add course event listener
+        document.getElementById('addCourseBtn').addEventListener('click', () => {
+            const courseName = document.getElementById('courseName').value;
+            const totalLectures = parseInt(document.getElementById('totalLectures').value, 10);
 
-    if (courseName && totalLectures > 0) {
-        fetch('/add-course/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ name: courseName, totalLectures: totalLectures }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateCourses();
-                document.getElementById('courseName').value = '';
-                document.getElementById('totalLectures').value = '';
-            } else {
-                alert(data.error);
-            }
-        })
-        .catch(error => console.error('Error adding course:', error));
-    }
-});
-
-// Render courses
-function renderCourses(courses) {
-    const coursesContainer = document.getElementById('coursesContainer');
-    coursesContainer.innerHTML = '';
-
-    courses.forEach((course, courseIndex) => {
-        const courseDiv = document.createElement('div');
-        courseDiv.classList.add('mb-3');
-
-        const courseTitle = document.createElement('h5');
-        courseTitle.textContent = course.name;
-        courseDiv.appendChild(courseTitle);
-
-        course.attendance.forEach((att, lectureIndex) => {
-            const lectureDiv = document.createElement('div');
-            lectureDiv.classList.add('d-flex', 'align-items-center', 'mb-2');
-
-            const lectureLabel = document.createElement('span');
-            lectureLabel.textContent = `Lecture ${lectureIndex + 1}`;
-            lectureLabel.classList.add('me-2');
-            lectureDiv.appendChild(lectureLabel);
-
-            const markAttendanceBtn = document.createElement('button');
-            markAttendanceBtn.classList.add('btn', att.attended ? 'btn-success' : 'btn-secondary');
-            markAttendanceBtn.textContent = 'Mark Attendance';
-            markAttendanceBtn.addEventListener('click', () => {
-                fetch('/mark-attendance/', {
+            if (courseName && totalLectures > 0) {
+                fetch('/add-course/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken'),
                     },
-                    body: JSON.stringify({
-                        courseId: course.id,
-                        lectureNumber: lectureIndex + 1,
-                        attended: !att.attended,
-                    }),
+                    body: JSON.stringify({ name: courseName, totalLectures: totalLectures }),
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         updateCourses();
-                        updateChart();
+                        document.getElementById('courseName').value = '';
+                        document.getElementById('totalLectures').value = '';
                     } else {
                         alert(data.error);
                     }
                 })
-                .catch(error => console.error('Error marking attendance:', error));
-            });
-
-            lectureDiv.appendChild(markAttendanceBtn);
-            courseDiv.appendChild(lectureDiv);
-        });
-
-        coursesContainer.appendChild(courseDiv);
-    });
-}
-
-
-// Fetch and update courses
-function updateCourses() {
-    fetch('/get-attendance-data/')
-    .then(response => response.json())
-    .then(data => {
-        courses = data.courses;
-        renderCourses(courses);
-    })
-    .catch(error => console.error('Error fetching attendance data:', error));
-}
-
-// Fetch and update chart
-function updateChart() {
-    fetch('/get-attendance-data/')
-    .then(response => response.json())
-    .then(data => {
-        const chartData = data.courses.map(course => {
-            const totalLectures = course.attendance.length;
-            const attendedLectures = course.attendance.filter(att => att.attended).length;
-            const attendancePercentage = (attendedLectures / totalLectures) * 100;
-            return { name: course.name, attendance: attendancePercentage };
-        });
-
-        if (attendanceChart) {
-            attendanceChart.data.labels = chartData.map(data => data.name);
-            attendanceChart.data.datasets[0].data = chartData.map(data => data.attendance);
-            attendanceChart.update();
-        } else {
-            const ctx = document.getElementById('attendanceChart').getContext('2d');
-            attendanceChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.map(data => data.name),
-                    datasets: [{
-                        label: 'Attendance Percentage',
-                        data: chartData.map(data => data.attendance),
-                        backgroundColor: '#4CAF50',
-                    }],
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                        },
-                    },
-                },
-            });
-        }
-    })
-    .catch(error => console.error('Error fetching attendance data:', error));
-}
-
-// Get CSRF token from cookie
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+                .catch(error => console.error('Error adding course:', error));
             }
+        });
+
+        // Render courses inside the accordion
+        function renderCourses(courses) {
+            const coursesAccordion = document.getElementById('coursesAccordion');
+            coursesAccordion.innerHTML = '';
+
+            courses.forEach((course, courseIndex) => {
+                const courseId = `course-${courseIndex}`;
+                const collapseId = `collapse-${courseIndex}`;
+
+                const courseItem = `
+                    <div class="card">
+                        <div class="card-header accordion-header" id="${courseId}">
+                            <h5 class="mb-0">
+                                <button class="accordion-button" type="button" data-toggle="collapse" data-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                                    ${course.name}
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="${collapseId}" class="collapse" aria-labelledby="${courseId}" data-parent="#coursesAccordion">
+                            <div class="card-body">
+                                ${renderLectureAttendance(course, courseIndex)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                coursesAccordion.innerHTML += courseItem;
+            });
         }
-    }
-    return cookieValue;
-}
+
+        // Render lecture attendance for each course
+        function renderLectureAttendance(course, courseIndex) {
+            let lecturesHtml = '';
+
+            course.attendance.forEach((att, lectureIndex) => {
+                lecturesHtml += `
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="me-2">Lecture ${lectureIndex + 1}</span>
+                        <button class="btn ${att.attended ? 'btn-success' : 'btn-secondary'}" onclick="toggleAttendance(${course.id}, ${lectureIndex + 1}, ${att.attended})">
+                            Mark Attendance
+                        </button>
+                    </div>
+                `;
+            });
+
+            return lecturesHtml;
+        }
+
+        // Toggle attendance for a specific lecture
+        function toggleAttendance(courseId, lectureNumber, attended) {
+            fetch('/mark-attendance/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ courseId, lectureNumber, attended: !attended }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCourses();
+                    updateChart();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Error marking attendance:', error));
+        }
+
+        // Fetch and update courses
+        function updateCourses() {
+            fetch('/get-attendance-data/')
+            .then(response => response.json())
+            .then(data => {
+                courses = data.courses;
+                renderCourses(courses);
+            })
+            .catch(error => console.error('Error fetching attendance data:', error));
+        }
+
+        // Fetch and update chart
+        function updateChart() {
+            fetch('/get-attendance-data/')
+            .then(response => response.json())
+            .then(data => {
+                const chartData = data.courses.map(course => {
+                    const totalLectures = course.attendance.length;
+                    const attendedLectures = course.attendance.filter(att => att.attended).length;
+                    const attendancePercentage = (attendedLectures / totalLectures) * 100;
+                    return { name: course.name, attendance: attendancePercentage };
+                });
+
+                if (attendanceChart) {
+                    attendanceChart.data.labels = chartData.map(data => data.name);
+                    attendanceChart.data.datasets[0].data = chartData.map(data => data.attendance);
+                    attendanceChart.update();
+                } else {
+                    const ctx = document.getElementById('attendanceChart').getContext('2d');
+                    attendanceChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.map(data => data.name),
+                            datasets: [{
+                                label: 'Attendance Percentage',
+                                data: chartData.map(data => data.attendance),
+                                backgroundColor: '#4CAF50',
+                            }],
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                },
+                            },
+                        },
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching attendance data:', error));
+        }
+
+        // Get CSRF token from cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
     </script>
+
+    <!-- Bootstrap 4 Script -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

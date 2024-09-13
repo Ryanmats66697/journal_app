@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     #Own Apps
     'finance',
     'todo',
-    'login',
     'hobbies',
     'attendance',
     'mood',

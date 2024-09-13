@@ -30,7 +30,8 @@ def health_tracker(request):
         elif 'goalType' in request.POST:
             goal_type = request.POST.get('goalType')
             goal_target = request.POST.get('goalTarget')
-            HealthGoal.objects.create(type=goal_type, target_value=goal_target)
+            HealthGoal.objects.create(goal_type=goal_type, target_value=goal_target)
+
 
         # Redirect after handling forms to avoid re-submission
         return redirect('health')
