@@ -8,44 +8,120 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+
+    <style>
+        .card {
+            height: 100%;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-title {
+            margin-top: 15px;
+            font-size: 1.5rem;
+        }
+
+        .card i {
+            font-size: 4rem;
+        }
+
+        .jumbotron {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #fff;
+        }
+    </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/home/">Student Dashboard</a>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item"><a class="nav-link" href="/todo/">Todo List</a></li>
-        </ul>
-    </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+    <a class="navbar-brand font-weight-bold" href="/home/" style="font-size: 1.5rem;">Home Dashboard</a>
+    <ul class="navbar-nav mr-auto">
+        <li class="nav-item"><a class="nav-link font-weight-bold" href="/finance/">Finance</a></li>
+        <li class="nav-item"><a class="nav-link font-weight-bold" href="/attendance/">Attendance</a></li>
+        <li class="nav-item"><a class="nav-link font-weight-bold" href="/health/">Health</a></li>
+        <li class="nav-item"><a class="nav-link font-weight-bold" href="/mood-tracker/">Mood</a></li>
+        <li class="nav-item"><a class="nav-link font-weight-bold" href="/hobbies/">Hobbies</a></li>
+        <li class="nav-item"><a class="nav-link font-weight-bold" href="/todo/">Todo List</a></li>
+    </ul>
+</nav>
+
+    <!-- Big Banner Section -->
+    <div class="jumbotron jumbotron-fluid text-center">
+        <div class="container">
+            <h1 class="display-4">Welcome to Your Student Dashboard</h1>
+            <p class="lead">Track your finances, attendance, health, mood, and more!</p>
+        </div>
+    </div>
 
     <div class="container my-4">
-        <h2 class="mb-4 text-center">Trackers</h2>
-        <ul class="nav nav-pills mb-3 justify-content-center" id="trackerTabs">
-            <li class="nav-item">
-                <a class="nav-link active" href="/finance/"><i class="fas fa-wallet"></i> Finance</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/attendance/"><i class="fas fa-calendar-alt"></i> Attendance</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="health.html"><i class="fas fa-heartbeat"></i> Health</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/mood-tracker"><i class="fas fa-smile"></i> Mood</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/hobbies/"><i class="fas fa-paint-brush"></i> Hobbies</a>
-            </li>
-        </ul>
+        <h2 class="mb-4 text-center">Your Trackers</h2>
 
-        <div class="card shadow-lg">
-            <div class="card-body">
-                <h4>Select a tracker from the tabs above to view detailed information.</h4>
-                <p class="text-muted">Manage your finances, track your attendance, monitor your health, and more.</p>
-                <hr>
-                <div class="text-center">
-                    <i class="fas fa-arrow-up fa-2x text-primary"></i>
-                    <p class="lead">Use the tabs to navigate between different trackers.</p>
+        <!-- 3x2 Grid using Bootstrap Cards with Larger Size -->
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <i class="fas fa-wallet fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Finance</h5>
+                        <a href="/finance/" class="btn btn-primary mt-auto">Go to Finance</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Attendance</h5>
+                        <a href="/attendance/" class="btn btn-success mt-auto">Go to Attendance</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <i class="fas fa-heartbeat fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Health</h5>
+                        <a href="/health/" class="btn btn-danger mt-auto">Go to Health</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <i class="fas fa-smile fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Mood</h5>
+                        <a href="/mood-tracker/" class="btn btn-warning mt-auto">Go to Mood</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <i class="fas fa-paint-brush fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Hobbies</h5>
+                        <a href="/hobbies/" class="btn btn-info mt-auto">Go to Hobbies</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body">
+                        <i class="fas fa-book fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">To Do List</h5>
+                        <a href="/todo/" class="btn btn-secondary mt-auto">Go to To Do List</a>
+                    </div>
                 </div>
             </div>
         </div>
