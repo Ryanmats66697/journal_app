@@ -11,15 +11,15 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
-    <a class="navbar-brand font-weight-bold" href="/home/" style="font-size: 1.5rem;">Dashboard</a>
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/finance/">Finance</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/attendance/">Attendance</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/health/">Health</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/mood-tracker/">Mood</a></li>
-        <li class="nav-item"><a class="nav-link active font-weight-bold" href="/hobbies/">Hobbies</a></li>
-        <li class="nav-item"><a class="nav-link font-weight-bold" href="/todo/">To Do List</a></li>
-    </ul>
+        <a class="navbar-brand font-weight-bold" href="{% url 'home' %}" style="font-size: 1.5rem;">Dashboard</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item"><a class="nav-link active font-weight-bold" href="/finance/">Finance</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/attendance/">Attendance</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/health/">Health</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/mood-tracker/">Mood</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/hobbies/">Hobbies</a></li>
+            <li class="nav-item"><a class="nav-link font-weight-bold" href="/todo/">To Do List</a></li>
+        </ul>
     </nav>
 
     <div class="container my-4">
@@ -32,14 +32,14 @@
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-list text-primary"></i> Current Hobbies</h5>
                         <form id="hobbyForm">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            {% csrf_token %}
                             <div class="form-group">
                                 <label for="hobbyName">Hobby Name</label>
-                                <input type="text" class="form-control" id="hobbyName" placeholder="E.g., Painting, Coding">
+                                <input type="text" class="form-control" id="hobbyName" placeholder="E.g., Painting, Coding" required>
                             </div>
                             <div class="form-group">
                                 <label for="hobbyTime">Time Spent (hours)</label>
-                                <input type="number" class="form-control" id="hobbyTime" placeholder="Enter hours spent">
+                                <input type="number" class="form-control" id="hobbyTime" placeholder="Enter hours spent" required>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Add Hobby</button>
                         </form>
@@ -64,15 +64,17 @@
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-bullseye text-warning"></i> Set Goals for Your Hobbies</h5>
                         <form id="goalForm">
+                            {% csrf_token %}
                             <div class="form-group">
                                 <label for="goalHobby">Select Hobby</label>
-                                <select class="form-control" id="goalHobby">
+                                <select class="form-control" id="goalHobby" required>
+                                    <option value="">Select a hobby</option>
                                     <!-- Hobbies will be dynamically populated here -->
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="goalTargetHours">Target Hours Per Week</label>
-                                <input type="number" class="form-control" id="goalTargetHours" placeholder="Enter target hours">
+                                <input type="number" class="form-control" id="goalTargetHours" placeholder="Enter target hours" required>
                             </div>
                             <button type="submit" class="btn btn-warning btn-block">Set Goal</button>
                         </form>
@@ -92,272 +94,134 @@
 
     <!-- Embedded JavaScript Code -->
     <script>
-    let hobbyChart; // Store chart object globally
+        let hobbyChart;
 
-    $(document).ready(function () {
-        // Fetch hobbies and goals on page load
-        fetchHobbies();
-        fetchGoals();
+        $(document).ready(function () {
+            // Fetch hobbies and goals on page load
+            fetchHobbies();
+            fetchGoals();
 
-        // Form submission to add a new hobby
-        $('#hobbyForm').submit(function (event) {
-            event.preventDefault();
-            const hobbyName = $('#hobbyName').val();
-            const hobbyTime = $('#hobbyTime').val();
+            // Form submission to add a new hobby
+            $('#hobbyForm').submit(function (event) {
+                event.preventDefault();
+                const hobbyName = $('#hobbyName').val();
+                const hobbyTime = $('#hobbyTime').val();
 
-            $.ajax({
-                url: '/add_hobby/',
-                type: 'POST',
-                data: JSON.stringify({ name: hobbyName, time_spent: hobbyTime }),
-                contentType: 'application/json',
-                headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
-                success: function (response) {
-                    if (response.success) {
-                        alert('Hobby added successfully!');
-                        fetchHobbies(); // Refresh hobby list and chart without reloading the page
-                    } else {
-                        alert('Failed to add hobby.');
+                $.ajax({
+                    url: '{% url "add_hobby" %}',
+                    type: 'POST',
+                    data: JSON.stringify({ name: hobbyName, time_spent: hobbyTime }),
+                    contentType: 'application/json',
+                    headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Hobby added successfully!');
+                            $('#hobbyForm')[0].reset(); // Reset form fields
+                            fetchHobbies();
+                        } else {
+                            alert('Failed to add hobby.');
+                        }
+                    },
+                    error: function () {
+                        alert('Error occurred while adding hobby.');
                     }
-                },
-                error: function () {
-                    alert('Error occurred while adding hobby.');
-                }
+                });
+            });
+
+            // Form submission to set a goal
+            $('#goalForm').submit(function (event) {
+                event.preventDefault();
+                const hobbyId = $('#goalHobby').val();
+                const targetHours = $('#goalTargetHours').val();
+
+                $.ajax({
+                    url: '{% url "set_goal" %}',
+                    type: 'POST',
+                    data: JSON.stringify({ hobby_id: hobbyId, target_hours: targetHours }),
+                    contentType: 'application/json',
+                    headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Goal set successfully!');
+                            fetchGoals();
+                        } else {
+                            alert('Failed to set goal.');
+                        }
+                    },
+                    error: function () {
+                        alert('Error occurred while setting goal.');
+                    }
+                });
             });
         });
 
-        // Form submission to set a goal
-        $('#goalForm').submit(function (event) {
-            event.preventDefault();
-            const hobbyId = $('#goalHobby').val();
-            const targetHours = $('#goalTargetHours').val();
+        function fetchHobbies() {
+            $.getJSON('{% url "get_hobbies" %}', function (data) {
+                const hobbySelect = $('#goalHobby');
+                hobbySelect.empty();
+                hobbySelect.append(new Option("Select a hobby", "")); // Reset the dropdown
 
-            $.ajax({
-                url: '/set_goal/',
-                type: 'POST',
-                data: JSON.stringify({ hobby_id: hobbyId, target_hours: targetHours }),
-                contentType: 'application/json',
-                headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
-                success: function (response) {
-                    if (response.success) {
-                        alert('Goal set successfully!');
-                        fetchGoals(); // Refresh goal list without reloading the page
-                    } else {
-                        alert('Failed to set goal.');
-                    }
-                },
-                error: function () {
-                    alert('Error occurred while setting goal.');
-                }
-            });
-        });
-    });
-
-    function fetchHobbies() {
-        $.getJSON('/get_hobbies/', function (data) {
-            const hobbySelect = $('#goalHobby');
-            hobbySelect.empty();
-
-            // Create a dictionary to aggregate time spent on each hobby
-            const hobbyData = {};
-
-            data.hobbies.forEach(function (hobby) {
-                // Populate the hobby dropdown
-                hobbySelect.append(new Option(hobby.name, hobby.id));
+                const hobbyData = {};
 
                 // Aggregate time spent for each hobby
-                if (hobbyData[hobby.name]) {
-                    hobbyData[hobby.name] += parseFloat(hobby.time_spent);
+                data.hobbies.forEach(function (hobby) {
+                    if (hobbyData[hobby.name]) {
+                        hobbyData[hobby.name] += parseFloat(hobby.total_time_spent);
+                    } else {
+                        hobbyData[hobby.name] = parseFloat(hobby.total_time_spent);
+                    }
+                });
+
+                const labels = Object.keys(hobbyData);
+                const values = Object.values(hobbyData);
+
+                // Render or update the chart
+                if (hobbyChart) {
+                    hobbyChart.data.labels = labels;
+                    hobbyChart.data.datasets[0].data = values;
+                    hobbyChart.update();
                 } else {
-                    hobbyData[hobby.name] = parseFloat(hobby.time_spent);
+                    renderChart(labels, values);
                 }
             });
+        }
 
-            // Prepare data for the chart
-            const labels = Object.keys(hobbyData);
-            const values = Object.values(hobbyData);
+        function fetchGoals() {
+            $.getJSON('{% url "get_goals" %}', function (data) {
+                const goalList = $('#goalList');
+                goalList.empty();
 
-            // Create or update the chart
-            if (hobbyChart) {
-                // Update existing chart
-                hobbyChart.data.labels = labels;
-                hobbyChart.data.datasets[0].data = values;
-                hobbyChart.update(); // Update chart in real time
-            } else {
-                // Create new chart
-                renderChart(labels, values);
-            }
-        });
-    }
-
-    function fetchGoals() {
-        $.getJSON('/get_goals/', function (data) {
-            const goalList = $('#goalList');
-            goalList.empty();
-
-            data.goals.forEach(function (goal) {
-                const listItem = $('<li>').addClass('list-group-item').text(`${goal.hobby__name}: ${goal.target_hours} hours/week`);
-                goalList.append(listItem);
+                data.goals.forEach(function (goal) {
+                    const listItem = $('<li>').addClass('list-group-item').text(`${goal.hobby__name}: ${goal.target_hours} hours/week`);
+                    goalList.append(listItem);
+                });
             });
-        });
-    }
+        }
 
-    function renderChart(labels, data) {
-        const ctx = $('#hobbyProgressChart');
-        hobbyChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Time Spent (hours)',
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                }],
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
+        function renderChart(labels, data) {
+            const ctx = $('#hobbyProgressChart');
+            hobbyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Time Spent (hours)',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                    }],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        },
                     },
                 },
-            },
-        });
-    }
-</script><script>
-    let hobbyChart; // Store chart object globally
-
-    $(document).ready(function () {
-        // Fetch hobbies and goals on page load
-        fetchHobbies();
-        fetchGoals();
-
-        // Form submission to add a new hobby
-        $('#hobbyForm').submit(function (event) {
-            event.preventDefault();
-            const hobbyName = $('#hobbyName').val();
-            const hobbyTime = $('#hobbyTime').val();
-
-            $.ajax({
-                url: '/add_hobby/',
-                type: 'POST',
-                data: JSON.stringify({ name: hobbyName, time_spent: hobbyTime }),
-                contentType: 'application/json',
-                headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
-                success: function (response) {
-                    if (response.success) {
-                        alert('Hobby added successfully!');
-                        fetchHobbies(); // Refresh hobby list and chart without reloading the page
-                    } else {
-                        alert('Failed to add hobby.');
-                    }
-                },
-                error: function () {
-                    alert('Error occurred while adding hobby.');
-                }
             });
-        });
-
-        // Form submission to set a goal
-        $('#goalForm').submit(function (event) {
-            event.preventDefault();
-            const hobbyId = $('#goalHobby').val();
-            const targetHours = $('#goalTargetHours').val();
-
-            $.ajax({
-                url: '/set_goal/',
-                type: 'POST',
-                data: JSON.stringify({ hobby_id: hobbyId, target_hours: targetHours }),
-                contentType: 'application/json',
-                headers: { 'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() },
-                success: function (response) {
-                    if (response.success) {
-                        alert('Goal set successfully!');
-                        fetchGoals(); // Refresh goal list without reloading the page
-                    } else {
-                        alert('Failed to set goal.');
-                    }
-                },
-                error: function () {
-                    alert('Error occurred while setting goal.');
-                }
-            });
-        });
-    });
-
-    function fetchHobbies() {
-        $.getJSON('/get_hobbies/', function (data) {
-            const hobbySelect = $('#goalHobby');
-            hobbySelect.empty();
-
-            // Create a dictionary to aggregate time spent on each hobby
-            const hobbyData = {};
-
-            data.hobbies.forEach(function (hobby) {
-                // Populate the hobby dropdown
-                hobbySelect.append(new Option(hobby.name, hobby.id));
-
-                // Aggregate time spent for each hobby
-                if (hobbyData[hobby.name]) {
-                    hobbyData[hobby.name] += parseFloat(hobby.time_spent);
-                } else {
-                    hobbyData[hobby.name] = parseFloat(hobby.time_spent);
-                }
-            });
-
-            // Prepare data for the chart
-            const labels = Object.keys(hobbyData);
-            const values = Object.values(hobbyData);
-
-            // Create or update the chart
-            if (hobbyChart) {
-                // Update existing chart
-                hobbyChart.data.labels = labels;
-                hobbyChart.data.datasets[0].data = values;
-                hobbyChart.update(); // Update chart in real time
-            } else {
-                // Create new chart
-                renderChart(labels, values);
-            }
-        });
-    }
-
-    function fetchGoals() {
-        $.getJSON('/get_goals/', function (data) {
-            const goalList = $('#goalList');
-            goalList.empty();
-
-            data.goals.forEach(function (goal) {
-                const listItem = $('<li>').addClass('list-group-item').text(`${goal.hobby__name}: ${goal.target_hours} hours/week`);
-                goalList.append(listItem);
-            });
-        });
-    }
-
-    function renderChart(labels, data) {
-        const ctx = $('#hobbyProgressChart');
-        hobbyChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Time Spent (hours)',
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                }],
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                    },
-                },
-            },
-        });
-    }
-</script>
+        }
+    </script>
 </body>
 
 </html>

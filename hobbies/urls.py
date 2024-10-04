@@ -1,10 +1,10 @@
 from django.urls import path
-from . import views
+from .views import hobbies, add_hobby, set_goal, get_hobbies, get_goals
 
 urlpatterns = [
-    path('hobbies/', views.hobbies_tracker, name='hobbies_tracker'),
-    path('get_hobbies/', views.get_hobbies, name='get_hobbies'),
-    path('get_goals/', views.get_goals, name='get_goals'),
-    path('add_hobby/', views.add_hobby, name='add_hobby'),  # Add this
-    path('set_goal/', views.set_goal, name='set_goal'),      # Add this
+    path('hobbies/', hobbies, name='hobbies_tracker'),
+    path('add_hobby/', add_hobby, name='add_hobby'),
+    path('set_goal/', set_goal, name='set_goal'),
+    path('get_hobbies/', get_hobbies, name='get_hobbies'),
+    path('get_goals/', get_goals, name='get_goals'),
 ]

@@ -1,8 +1,6 @@
 from django.contrib import admin
+from .models import Hobby, HobbyGoal  # Import the correct models
 
-from .models import Hobby
-from .models import Goal
-
-# Register your models here.
+# Register the models with the admin site
 admin.site.register(Hobby)
-admin.site.register(Goal)
+admin.site.register(HobbyGoal)
